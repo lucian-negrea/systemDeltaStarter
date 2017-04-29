@@ -1,0 +1,47 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.anritsu.systemdelta.systemdeltastarter;
+
+import java.net.InetSocketAddress;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.webapp.WebAppContext;
+
+/**
+ *
+ * @author ro100051
+ */
+public class SystemDeltaWebserver {
+    private Server server;
+    private String warPath;
+    String port;
+    
+    public SystemDeltaWebserver(String warPath, String port){
+        this.warPath = warPath;
+        this.port = port;
+        try {
+            server = new Server(new InetSocketAddress(Integer.parseInt(port)));            
+            WebAppContext webapp = new WebAppContext();
+            webapp.setContextPath("/");
+            webapp.setWar(warPath);
+            webapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",".*/[^/]*jstl.*\\.jar$");
+            
+            //4. Enabling the Annotation based configuration
+		org.eclipse.jetty.webapp.Configuration.ClassList classlist = org.eclipse.jetty.webapp.Configuration.ClassList.setServerDefault(server);
+        classlist.addAfter("org.eclipse.jetty.webapp.FragmentConfiguration", "org.eclipse.jetty.plus.webapp.EnvConfiguration", "org.eclipse.jetty.plus.webapp.PlusConfiguration");
+        classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.annotations.AnnotationConfiguration");
+        
+            server.setHandler(webapp);
+            
+            server.start();
+        } catch (Exception ex) {
+            Logger.getLogger(SystemDeltaWebserver.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+}
